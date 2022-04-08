@@ -1,4 +1,5 @@
 from pyspark.sql import SparkSession
+from pyspark.sql.types import IntegerType,StringType
 from pyspark.sql.functions import when, expr, add_months
 from pyspark.sql import functions as fn
 
@@ -13,7 +14,28 @@ def test_when():
 	# 			  .when(df.type == 6, "点击")
 	# 			  .otherwise("不存在的类型")
 	# 			  ).show()
-
+	# 使用自定义函数
+	def encode(x):
+		if x==1:
+			return '浏览'
+		elif x==2:
+			return '加购'
+		elif x==3:
+			return '删购'
+		elif x==4:
+			return '下单'
+		elif x==5:
+			return '关注'
+		elif x==6 :
+			return '点击'
+		else:
+			'不存在的行为类型'
+	# 必须使用functions下的udf对自定义函数做一层包装，才能使用
+	type_udf = fn.udf(encode, StringType())
+	df.withColumn('行为类型', type_udf(df['type'])).show()
+	# 如果逻辑比较简单的话可以使用lambda函数
+	self_udf = fn.udf(lambda x: 'little' if x < 7 else 'big', StringType())
+	df.withColumn('品类', self_udf(df['cate'])).show()
 	# 使用spark sql
 	# df.createTempView('user_behavior')
 	# spark.sql("select *, case when type=1 then '浏览' "+
@@ -24,7 +46,7 @@ def test_when():
 	# 		  "when type=6 then '点击' " +
 	# 		  "else type end as `行为类型` from user_behavior"
 	# 		  ).show()
-	df.groupby('cate').count().show()
+	# df.groupby('cate').count().show()
 
 	# 同时判断多列
 	# df.withColumn('品类行为偏好',
@@ -53,6 +75,8 @@ def test_groupby():
 	# df.groupby(fn.substring('time',1,10).alias('date')).count().show()
 	# df.groupby(fn.substring('time',1,10).alias('date')).sum('brand').show()
 	df.groupby(fn.substring('time',1,10).alias('date')).agg(fn.collect_list('user_id')).show()
+
+
 	# df.groupby(fn.substring('time',1,10).alias('date')).apply(lambda x:','.join(x)).show()
 	# fn.substring()
 def test_concat_ws():
@@ -60,9 +84,10 @@ def test_concat_ws():
 
 if __name__ == '__main__':
 	spark = SparkSession.builder.master("local[4]").appName("builtin").getOrCreate()
-	df = spark.read.parquet('C:/Users/Master/PycharmProjects/spark/data/actions.parquet')
+	df = spark.read.parquet('E:/spark/data/action_part.parquet')
+	# df1 = spark.read.csv('E:/spark/data/order.csv')
 	# df.printSchema()
-	# test_when()
+	test_when()
 	# test_expr()
 	# test_split()
-	test_groupby()
+	# test_groupby()
