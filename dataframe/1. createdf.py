@@ -1,5 +1,6 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.types import StructType,StructField, StringType, LongType, IntegerType, FloatType, BooleanType
+from pyspark.sql import functions as fn
 import pandas as pd
 import numpy as np
 
@@ -54,10 +55,40 @@ def test_read_csv():
     print(data.columns)
 
 
+def test_json():
+    # df = spark.read.json('C:/Users/Master/PycharmProjects/spark/data/zipcodes.json')
+    # df.printSchema()
+    # df.show()
+    # df = spark.read.json(['C:/Users/Master/PycharmProjects/spark/data/zipcode1.json',
+    #                      'C:/Users/Master/PycharmProjects/spark/data/zipcode2.json'])
+    # df.show()
+    # df = spark.read.option('multiline','true').json('C:/Users/Master/PycharmProjects/spark/data/multiline-zipcode.json')
+    # df.show()
+    # 使用SQL读取json
+    spark.sql("CREATE OR REPLACE TEMPORARY VIEW zipcode USING json OPTIONS (path 'data/zipcodes.json')")
+    spark.sql("select * from zipcode").show()
+
+def test_parquet():
+    # df = spark.read.csv('C:/Users/Master/PycharmProjects/spark/data/actions.csv',header=True,inferSchema=True)
+    # df.write.parquet('C:/Users/Master/PycharmProjects/spark/data/actions.parquet')
+    # df1 = spark.read.csv('C:/Users/Master/PycharmProjects/spark/data/actions1.csv',header=True,inferSchema=True)
+    # df1.write.mode('append').parquet('C:/Users/Master/PycharmProjects/spark/data/actions.parquet')
+    # 使用partitionBy分区保存
+    # pardf = spark.read.parquet('C:/Users/Master/PycharmProjects/spark/data/actions.parquet')
+    # pardf.show()
+    # 创建一个新列
+    # newdf = pardf.withColumn('date', fn.split('time',' ')[0])
+    # newdf.show()
+    # 分区保存
+    # newdf.write.partitionBy("date").mode("overwrite").parquet("C:/Users/Master/PycharmProjects/spark/data/action_part.parquet")
+    # 读取分区文件
+    spark.read.parquet('C:/Users/Master/PycharmProjects/spark/data/action_part.parquet/date=2016-03-15').show()
 
 if __name__ == '__main__':
     spark = SparkSession.builder.master('local[2]').appName('df').getOrCreate()
-    spark.conf.set("spark.sql.execution.arrow.enabled", "true")
+    spark.conf.set("spark.sql.execution.arrow.pyspark.enabled", "true")
     # test_todf()
     # test_creat()
-    # test_read_csv()
+    # test_csv()
+    # test_json()
+    test_parquet()
