@@ -3,7 +3,78 @@ PySpark withColumn() is a transformation function of DataFrame which is used to 
 convert the datatype of an existing column, create a new column, and many more.
 """
 from pyspark.sql import SparkSession
-from pyspark.sql import functions as F
+from pyspark.sql import functions as fn
+
+
+def test_col_idx():
+	"""
+	 列索引
+	"""
+	l = [("James", 23), ("Ann", 40)]
+	df1 = spark.createDataFrame(l).toDF("name","age")
+	df1.printSchema()
+	df1.show()
+	# 方式一
+	df1.select(df.age).show()
+	df1.select(df["age"]).show()
+	df1.select(df["name"]).show()
+	# 方式二
+	df1.select(fn.col("age")).show()
+	df1.select(fn.col("name")).show()
+
+
+def test_col_op():
+	"""
+	列方法,列操作
+	"""
+
+	l = [(100, 2, 1), (200, 3, 4), (300, 4, 4)]
+	df1 = spark.createDataFrame(l).toDF("col1", "col2", "col3")
+
+	# 数学运算
+	# df1.select(df1.col1 + df1.col2).show()
+	# df1.select(df1.col1 - df1.col2).show()
+	# df1.select(df1.col1 * df1.col2).show()
+	# df1.select(df1.col1 / df1.col2).show()
+	# df1.select(df1.col1 % df1.col2).show()
+
+	# 布尔运算
+	# df1.select(df1.col2 > df1.col3).show()
+	# df1.select(df1.col2 < df1.col3).show()
+	# df1.select(df1.col2 == df1.col3).show()
+
+def test_alias():
+	# 别名
+	l = [("James", "Bond", "100", None),
+	        ("Ann", "Varsa", "200", 'F'),
+	        ("Tom Cruise", "XXX", "400", ''),
+	        ("Tom Brand", None, "400", 'M')]
+	cols = ["fname", "lname", "id", "gender"]
+	df1 = spark.createDataFrame(data, columns)
+	# alias
+	# df1.select(df1.fname.alias("first_name"), df1.lname.alias("last_name")).show()
+	# 转换类型
+	# df1.select(df1.fname, df1.id.cast("int")).printSchema()
+	# 排序
+	# df1.sort(df1.id.asc()).show()
+	# df1.sort(df1.id.desc()).show()
+
+def test_filter():
+	# filter
+	# between
+	# df.filter(df.id.between(100, 300)).show()
+	# contains
+	# df.filter(df['fname'].contains('Tom')).show()
+	# startwith endwith
+	# df.filter(df['fname'].startswith('T')).show()
+	# isNull notNull
+	# df.filter(df['gender'].isNull()).show()
+	# df.filter(df['gender'].isNotNull()).show()
+	# like
+	# df.filter(df['lname'].like('B%')).show()
+	# isin
+	# df.filter(df['id'].isin(['100', '200'])).show()
+	pass
 
 
 def test_datatype():
@@ -17,7 +88,8 @@ def test_datatype():
 
 
 def test_stat():
-	df.select(F.max(zipcode['population'])).show()
+	df.select(fn.max(zipcode['population'])).show()
+	df.select(fn.min(zipcode['population'])).show()
 
 
 def test_update():
@@ -59,6 +131,7 @@ def test_flatmap():
 	# nestdf.select(nestdf.name, F.posexplode(nestdf['properties'])).show()
 	# poseexplode_outer
 	nestdf.select(nestdf.name, F.posexplode_outer(nestdf['languages'])).show()
+
 def test_na():
 	zipcode.printSchema()
 	# 填充空值
