@@ -111,6 +111,8 @@ def test_groupby():
 	# df1.groupby(fn.substring('o_date',1,10)).pivot('o_area').sum('o_sku_num').show()
 	# df1.groupby(fn.substring('o_date',1,10), 'o_area').sum('o_sku_num').show()
 
+
+
 def test_time():
 
 	# to_timestamp
@@ -145,6 +147,38 @@ def test_window():
 def test_concat_ws():
 	pass
 
+
+def test_join():
+	d1 = [(1, "Smith", -1, "2018", "10", "M", 3000),
+		   (2, "Rose", 1, "2010", "20", "M", 4000),
+		   (3, "Williams", 1, "2010", "10", "M", 1000),
+		   (4, "Jones", 2, "2005", "10", "F", 2000),
+		   (5, "Brown", 2, "2010", "40", "", -1),
+		   (6, "Brown", 2, "2010", "50", "", -1)
+		   ]
+	empColumns = ["emp_id", "name", "superior_emp_id", "year_joined",
+				  "emp_dept_id", "gender", "salary"]
+
+	emp = spark.createDataFrame(data=d1, schema=empColumns)
+	# emp.printSchema()
+	emp.show(truncate=False)
+
+	d2 = [("Finance", 10),
+			("Marketing", 20),
+			("Sales", 30),
+			("IT", 40)
+			]
+	deptColumns = ["dept_name", "dept_id"]
+	dept = spark.createDataFrame(data=d2, schema=deptColumns)
+	# dept.printSchema()
+	dept.show(truncate=False)
+
+	# emp.join(dept,emp.emp_dept_id==dept.dept_id, how='inner').show()
+	# emp.join(dept,emp.emp_dept_id==dept.dept_id, how='outer').show()
+	emp.join(dept,emp.emp_dept_id==dept.dept_id, how='left').show()
+	emp.join(dept,emp.emp_dept_id==dept.dept_id, how='leftsemi').show()
+
+
 if __name__ == '__main__':
 	spark = SparkSession.builder.master("local[4]").appName("builtin").getOrCreate()
 	df = spark.read.parquet('E:/spark/data/action_part.parquet')
@@ -153,7 +187,10 @@ if __name__ == '__main__':
 	# test_expr()
 	# test_split()
 
-	df1 = spark.read.csv('E:/spark/data/order.csv',inferSchema=True,header=True)
+	# df1 = spark.read.csv('E:/spark/data/order.csv',inferSchema=True,header=True)
 	# test_groupby()
 	# test_time()
-	test_window()
+	# test_window()
+
+	user = spark.read.csv('C:/Users/Master//PycharmProjects/spark/data/user.csv',encoding='gbk',header=True,inferSchema=True)
+	test_join()
