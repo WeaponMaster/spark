@@ -69,10 +69,10 @@ def test_json():
     spark.sql("select * from zipcode").show()
 
 def test_parquet():
-    # df = spark.read.csv('C:/Users/Master/PycharmProjects/spark/data/actions.csv',header=True,inferSchema=True)
-    # df.write.parquet('C:/Users/Master/PycharmProjects/spark/data/actions.parquet')
-    # df1 = spark.read.csv('C:/Users/Master/PycharmProjects/spark/data/actions1.csv',header=True,inferSchema=True)
-    # df1.write.mode('append').parquet('C:/Users/Master/PycharmProjects/spark/data/actions.parquet')
+    df = spark.read.csv('C:/Users/Master/PycharmProjects/spark/data/actions.csv',header=True,inferSchema=True)
+    df.write.parquet('C:/Users/Master/PycharmProjects/spark/data/actions.parquet')
+    df1 = spark.read.csv('C:/Users/Master/PycharmProjects/spark/data/actions1.csv',header=True,inferSchema=True)
+    df1.write.mode('append').parquet('C:/Users/Master/PycharmProjects/spark/data/actions.parquet')
     # 使用partitionBy分区保存
     # pardf = spark.read.parquet('C:/Users/Master/PycharmProjects/spark/data/actions.parquet')
     # pardf.show()
@@ -84,6 +84,21 @@ def test_parquet():
     # 读取分区文件
     spark.read.parquet('C:/Users/Master/PycharmProjects/spark/data/action_part.parquet/date=2016-03-15').show()
 
+def test_jdbc():
+    """
+    https://dev.mysql.com/downloads/connector/j/
+    :return:
+    """
+    prop = {
+        'user': 'root',
+        'password': '123456',
+        'driver': 'com.mysql.cj.jdbc.Driver'
+            }
+    data = spark.read.jdbc(url='jdbc:mysql://localhost:3306/train?serverTimezone=UTC',table='orders',properties=prop)
+    data.show()
+
+    data.write.jdbc(url='jdbc:mysql://localhost:3306/train?serverTimezone=UTC',table = 'order_temp',properties=prop,mode='overwrite')
+
 if __name__ == '__main__':
     spark = SparkSession.builder.master('local[2]').appName('df').getOrCreate()
     spark.conf.set("spark.sql.execution.arrow.pyspark.enabled", "true")
@@ -91,4 +106,5 @@ if __name__ == '__main__':
     # test_creat()
     # test_csv()
     # test_json()
-    test_parquet()
+    # test_parquet()
+    test_jdbc()
